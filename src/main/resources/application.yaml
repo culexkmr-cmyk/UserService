@@ -6,12 +6,10 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-
   h2:
     console:
       enabled: true
       path: /h2-console
-
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
@@ -28,6 +26,19 @@ logging:
 
 server:
   port: 8080
+
 app:
   jwt:
-    secret: "aabbccddaabbccddaabbccddaabbccdd"
+
+    private-key-location: ${PRIVATE_KEY_PATH:classpath:keys/private.pem}
+    access-expiration-ms: 900000
+    refresh-expiration-ms: 86400000
+oauth2:
+  client:
+    registration:
+      google:
+        client-id: ВАШ_CLIENT_ID_GOOGLE
+        client-secret: ВАШ_CLIENT_SECRET_GOOGLE
+      github:
+        client-id: ВАШ_CLIENT_ID_GITHUB
+        client-secret: ВАШ_CLIENT_SECRET_GITHUB

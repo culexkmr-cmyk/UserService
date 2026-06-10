@@ -16,19 +16,20 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true, length = 64)
-    private String tokenHash;
+    @Column(unique = true, nullable = false)
+    private String jti;
 
+    @Column(nullable = false)
     private Instant expiresAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public RefreshToken(String tokenHash, Instant expiresAt, User user){
-        this.tokenHash=tokenHash;
+    public RefreshToken(String jti, Instant expiresAt, User user){
         this.expiresAt=expiresAt;
         this.user=user;
+        this.jti=jti;
         if (user != null) {
             user.getRefreshTokens().add(this);
         }

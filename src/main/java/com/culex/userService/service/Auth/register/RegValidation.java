@@ -1,5 +1,6 @@
 package com.culex.userService.service.Auth.register;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import com.culex.userService.DB.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,12 +9,6 @@ import java.util.regex.Pattern;
 @Service
 public class RegValidation {
     private final UserRepository repository;
-
-    // Регулярное выражение для базовой проверки корректности email
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "^[A-Za-z0-9+_.-]+@(.+)$"
-    );
-
     @Autowired
     public RegValidation(UserRepository repository) {
         this.repository = repository;
@@ -29,8 +24,8 @@ public class RegValidation {
     }
 
     public void passwordValidation(String rawPassword) {
-        if (rawPassword == null || rawPassword.length() <= 16 || rawPassword.length() >= 128) {
-            throw new IllegalArgumentException("Пароль должен быть длиннее 16 и меньше 128 символов");
+        if (rawPassword == null || rawPassword.length() <= 8 || rawPassword.length() >= 128) {
+            throw new IllegalArgumentException("Пароль должен быть длиннее 8 и меньше 128 символов");
         }
     }
 
@@ -41,7 +36,7 @@ public class RegValidation {
     }
 
     public void emailValidation(String email) {
-        if (email == null || !EMAIL_PATTERN.matcher(email).matches()) {
+        if (email == null || !EmailValidator.getInstance().isValid(email)) {
             throw new IllegalArgumentException("Некорректный формат email");
         }
     }
