@@ -17,7 +17,7 @@ public class AuthConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()   // ← доверяем Gateway
+                        .anyRequest().permitAll()
                 );
         return http.build();
     }

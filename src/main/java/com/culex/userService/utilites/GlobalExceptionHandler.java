@@ -41,4 +41,8 @@ public class GlobalExceptionHandler {
                 "message", message != null ? message : "No message"
         ));
     }
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage()); // или CONFLICT, 409
+    }
 }

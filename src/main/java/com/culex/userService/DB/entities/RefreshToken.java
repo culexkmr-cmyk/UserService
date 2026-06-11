@@ -1,20 +1,22 @@
 package com.culex.userService.DB.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.time.Instant;
 
 @Entity
-@Table(name = "refreshTokens")
-@Getter @Setter
+@Table(name = "refresh_tokens")
+@Getter
+@Setter
+@NoArgsConstructor
 public class RefreshToken {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;  // был long -> изменил на Long (лучше для JPA)
 
     @Column(unique = true, nullable = false)
     private String jti;
@@ -23,17 +25,15 @@ public class RefreshToken {
     private Instant expiresAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public RefreshToken(String jti, Instant expiresAt, User user){
-        this.expiresAt=expiresAt;
-        this.user=user;
-        this.jti=jti;
+    public RefreshToken(String jti, Instant expiresAt, User user) {
+        this.jti = jti;
+        this.expiresAt = expiresAt;
+        this.user = user;
         if (user != null) {
             user.getRefreshTokens().add(this);
         }
-
     }
-    protected RefreshToken(){}
 }

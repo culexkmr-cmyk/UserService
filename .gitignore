@@ -25,7 +25,7 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-!**/src/main/resourses/keys/
+**src/main/resources/keys/*.pem
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
