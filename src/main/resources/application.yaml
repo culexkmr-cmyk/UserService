@@ -33,12 +33,16 @@ app:
     private-key-location: ${PRIVATE_KEY_PATH:classpath:keys/private.pem}
     access-expiration-ms: 900000
     refresh-expiration-ms: 86400000
-oauth2:
-  client:
-    registration:
-      google:
-        client-id: ВАШ_CLIENT_ID_GOOGLE
-        client-secret: ВАШ_CLIENT_SECRET_GOOGLE
-      github:
-        client-id: ВАШ_CLIENT_ID_GITHUB
-        client-secret: ВАШ_CLIENT_SECRET_GITHUB
+  auth:
+    register:
+      password:
+        length:
+          max: 128
+          min: 8
+      username:
+        length:
+          max: 32
+          min: 3
+      nickname:
+        length:
+          max: 50

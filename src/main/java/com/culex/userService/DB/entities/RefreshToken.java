@@ -16,7 +16,7 @@ public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // был long -> изменил на Long (лучше для JPA)
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String jti;
