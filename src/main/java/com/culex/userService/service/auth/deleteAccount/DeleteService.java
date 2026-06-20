@@ -15,7 +15,7 @@ public class DeleteService {
     public DeleteService(DeleteValidation deleteValidation) {
         this.deleteValidation = deleteValidation;
     }
-
+    @Transactional
     public void deleteUser(Long userId){
         User user=deleteValidation.allValidation(userId);
         user.anonymize();

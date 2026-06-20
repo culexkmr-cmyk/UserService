@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,9 +19,8 @@ public class LogoutController {
         this.logoutService=logoutService;
     }
 
-    @DeleteMapping("api/logout")
-    public ResponseEntity<?> logout(@RequestBody LogoutDto dto){
-        Long userId=dto.userId();
+    @DeleteMapping("api/auth/logout")
+    public ResponseEntity<?> logout(@RequestBody LogoutDto dto,@RequestHeader("X-User-Id") Long userId){
         String jti=dto.jti();
         logoutService.logout(userId, jti);
         return ResponseEntity.status(HttpStatus.OK).build();

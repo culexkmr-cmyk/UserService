@@ -5,9 +5,7 @@ import com.culex.userService.service.user.changeNickname.ChangeNicknameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ChangeNicknameController {
@@ -19,11 +17,10 @@ public class ChangeNicknameController {
         this.changeNicknameService=changeNicknameService;
     }
 
-    @PatchMapping("/api/updateNickname")
-    public ResponseEntity<?> updateNickname(@RequestBody ChangeNicknameDto changeNicknameDto){
+    @PatchMapping("/api/account/{id}/nickname")
+    public ResponseEntity<?> updateNickname(@RequestBody ChangeNicknameDto changeNicknameDto, @PathVariable Long id){
         String newNickname = changeNicknameDto.newNickname();
-        Long userId = changeNicknameDto.userId();
-        User user=changeNicknameService.changeNickname(newNickname, userId);
+        User user=changeNicknameService.changeNickname(newNickname, id);
         return ResponseEntity.status(HttpStatus.OK).body("success nickname change for user "+ user.getUsername());
     }
 }

@@ -1,75 +1,58 @@
 # UserService
 
-Microservice for manage of users' accounts.
+### Microservice for manage of users' accounts.
 
 ## API
 
-### DELETE /api/deleteAccount
-Delete user account.
-- **Request parameter**: `userId` (Long) – передаётся как query-параметр.
-- **Response**: HTTP status only.
+## DELETE /api/account
 
-### POST /api/updateToken
-Update refresh token.
-- **Request body (JSON)**: `{ "userId": Long, "jti": String }`
-- **Response (JSON)**: `{ "accessToken": String, "refreshToken": String }`
+### Delete user account.
 
-### POST /api/login
-Get access token and refresh token.
-- **Request body (JSON)**: `{ "password": String, "username": String }`
-- **Response (JSON)**: `{ "accessToken": String, "refreshToken": String }`
+- Request header: X-User-Id (Long) – user identifier.
+- Response: HTTP status only (200 OK).
 
-### DELETE /api/logout
-Delete refresh token.
-- **Request body (JSON)**: `{ "userId": Long, "jti": String }`
-- **Response**: HTTP status only.
+## POST /api/auth/updateToken
 
-### POST /api/register
-Create new user.
-- **Request body (JSON)**: `{ "password": String, "username": String, "nickname": String, "email": String }`
-- **Response (JSON)**: `{ "userId": Long, "username": String }`
+### update access and refresh tokens.
 
-### PATCH /api/updateNickname
-Change nickname.
-- **Request body (JSON)**: `{ "newNickname": String, "userId": Long }`
-- **Response**: HTTP status only.
+- Request header: X-User-Id (Long) – user identifier.
+- Request body (JSON): { "jti": String }
+- Response (JSON): { "accessToken": String, "refreshToken": String }
 
-### GET /api/getUsernameById
-Get username by user id.
-- **Request parameter**: `id` (Long) – query parameter.
-- **Response (String)**: username.
+## POST /api/auth/login
+### Authenticate user and get tokens.
 
-### GET /api/getEmailById
-Get email by user id.
-- **Request parameter**: `id` (Long) – query parameter.
-- **Response (String)**: email.
+- Request body (JSON): { "password": String, "username": String }
+- Response (JSON): { "accessToken": String, "refreshToken": String }
 
-### GET /api/getNicknameById
-Get nickname by user id.
-- **Request parameter**: `id` (Long) – query parameter.
-- **Response (String)**: nickname.
+## DELETE /api/auth/logout
+### Invalidate refresh token (logout).
 
-### GET /api/getCreatedAtById
-Get creation date by user id.
-- **Request parameter**: `id` (Long) – query parameter.
-- **Response (Instant)**: creation timestamp.
+- Request header: X-User-Id (Long) – user identifier.
+- Request body (JSON): { "jti": String }
+- Response: HTTP status only (200 OK).
 
-### GET /api/getIdByUsername
-Get username by username (returns the same string, but kept for consistency).
-- **Request parameter**: `username` (String) – query parameter.
-- **Response (String)**: id.
+## POST /api/account
+### Create a new user account.
 
-### GET /api/getEmailByUsername
-Get email by username.
-- **Request parameter**: `username` (String) – query parameter.
-- **Response (String)**: email.
+- Request body (JSON): { "password": String, "username": String, "nickname": String, "email": String }
+- Response (JSON): { "userId": Long, "username": String } (201 Created)
 
-### GET /api/getNicknameByUsername
-Get nickname by username.
-- **Request parameter**: `username` (String) – query parameter.
-- **Response (String)**: nickname.
+## PATCH /api/account/{userId}/nickname
+### Change user's nickname.
 
-### GET /api/getCreatedAtByUsername
-Get creation date by username.
-- **Request parameter**: `username` (String) – query parameter.
-- **Response (Instant)**: creation timestamp.
+- Path variable: userId (Long) – user identifier.
+- Request body (JSON): { "newNickname": String }
+- Response: "success nickname change for user <username>" (200 OK)
+
+## GET /api/account/ProfileByUsername/{username}
+### get full user profile by username.
+
+- Path variable: username (String) – login.
+- Response (JSON): { "username": String, "userId": Long, "email": String, "nickname": String, "createdAt": Instant }
+
+## GET /api/account/ProfileById/{userId}
+### Get full user profile by user ID.
+
+- Path variable: id (Long) – user identifier.
+- Response (JSON): { "username": String, "userId": Long, "email": String, "nickname": String, "createdAt": Instant }

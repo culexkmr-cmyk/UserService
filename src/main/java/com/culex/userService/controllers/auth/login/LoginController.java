@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 @RestController
 public class LoginController {
 
@@ -18,7 +17,7 @@ public class LoginController {
         this.loginService=loginService;
     }
 
-    @PostMapping("/api/login")
+    @PostMapping("/api/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginDto dto){
         String password=dto.password();
         String username=dto.username();

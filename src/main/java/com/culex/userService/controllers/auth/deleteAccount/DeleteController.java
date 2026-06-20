@@ -5,9 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-
 @RestController
 public class DeleteController {
 
@@ -18,9 +17,8 @@ public class DeleteController {
         this.deleteService=deleteService;
     }
 
-    @DeleteMapping("/api/deleteAccount")
-    public ResponseEntity<?> deleteAccount(@RequestBody DeleteDto deleteDto){
-        Long userId=deleteDto.id();
+    @DeleteMapping("/api/account")
+    public ResponseEntity<?> deleteAccount(@RequestHeader("X-User-Id") Long userId){
         deleteService.deleteUser(userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

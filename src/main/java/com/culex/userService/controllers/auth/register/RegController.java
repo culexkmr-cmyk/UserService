@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 @RestController
 public class RegController {
 
@@ -19,7 +18,7 @@ public class RegController {
         this.regService=regService;
     }
 
-    @PostMapping("/api/register")
+    @PostMapping("/api/account")
     public ResponseEntity<?> register(@RequestBody RegDto dto){
         String password=dto.password();
         String username=dto.username();

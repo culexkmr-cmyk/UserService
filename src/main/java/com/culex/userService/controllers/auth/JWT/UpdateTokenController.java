@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,10 +19,9 @@ public class UpdateTokenController {
         this.tokenUpdater=tokenUpdater;
     }
 
-    @PostMapping("/api/updateToken")
-    public ResponseEntity<?> updateToken(@RequestBody UpdateTokenDto updateTokenDto){
+    @PostMapping("/api/auth/updateToken")
+    public ResponseEntity<?> updateToken(@RequestBody UpdateTokenDto updateTokenDto,@RequestHeader("X-User-Id") Long userId){
         String jti=updateTokenDto.jti();
-        Long userId=updateTokenDto.userId();
         return ResponseEntity.status(HttpStatus.OK).body(tokenUpdater.updateToken(userId, jti));
     }
 }
