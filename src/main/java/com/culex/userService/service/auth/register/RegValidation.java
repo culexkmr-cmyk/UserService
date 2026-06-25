@@ -32,7 +32,7 @@
                 this.maxNicknameLength=maxNicknameLength;
             }
 
-            public void usernameValidation(String username) {
+            private void usernameValidation(String username) {
                 if (username == null || username.length() < minUsernameLength || username.length() > maxUsernameLength) {
                     throw new IllegalArgumentException("Username must be longer than " + (minUsernameLength-1)+" and less than " + (maxUsernameLength-1)+ " character");
                 }
@@ -43,17 +43,17 @@
                     throw new IllegalArgumentException("Username cannot start with 'deleted_'");
                 }
             }
-            public void passwordValidation(String rawPassword) {
+            private void passwordValidation(String rawPassword) {
                 if (rawPassword == null || rawPassword.length() < minPasswordLength || rawPassword.length() > maxPasswordLength) {
                     throw new IllegalArgumentException("Password must be longer than " + (minPasswordLength-1)+" and less than " + (maxPasswordLength-1)+ " character");
                 }
             }
-            public void nicknameValidation(String nickname) {
+            private void nicknameValidation(String nickname) {
                 if (nickname == null || nickname.length() > maxNicknameLength) {
                     throw new IllegalArgumentException("Nickname must be less than "+ (maxNicknameLength+1) +" character");
                 }
             }
-            public void emailValidation(String email) {
+            private void emailValidation(String email) {
                 if (email == null || !EmailValidator.getInstance().isValid(email)) {
                     throw new IllegalArgumentException("Invalid email format");
                 }

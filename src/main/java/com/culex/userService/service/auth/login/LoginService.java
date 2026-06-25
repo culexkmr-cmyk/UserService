@@ -3,9 +3,12 @@
     import com.culex.userService.DB.entities.RefreshToken;
     import com.culex.userService.DB.entities.User;
     import com.culex.userService.DB.repositories.RefreshTokenRepository;
+    import com.culex.userService.DB.repositories.UserRepository;
     import com.culex.userService.service.auth.JWT.JwtTokenGenerator;
+    import com.culex.userService.service.auth.JWT.RefreshTokenData;
     import jakarta.transaction.Transactional;
     import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.security.core.userdetails.UsernameNotFoundException;
     import org.springframework.stereotype.Service;
 
     import java.time.Instant;
@@ -15,25 +18,39 @@
         private final JwtTokenGenerator tokenGenerator;
         private final RefreshTokenRepository refreshTokenRepository;
         private final LoginValidation loginValidation;
+        private final UserRepository userRepository;
 
         @Autowired
-        public LoginService(JwtTokenGenerator tokenGenerator, RefreshTokenRepository refreshTokenRepository, LoginValidation loginValidation) {
+        public LoginService(JwtTokenGenerator tokenGenerator, RefreshTokenRepository refreshTokenRepository, LoginValidation loginValidation,UserRepository userRepository) {
             this.tokenGenerator = tokenGenerator;
             this.loginValidation=loginValidation;
             this.refreshTokenRepository = refreshTokenRepository;
+            this.userRepository=userRepository;
         }
 
         @Transactional
         public LoginResponse login(String password, String username) {
-            User user=loginValidation.allValidation(password, username);
+            User user=userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+            loginValidation.allValidation(password, user);
+
+            RefreshTokenData refreshTokenData = tokenGenerator.generateRefreshToken(user.getUsername(), user.getId());
+
             String accessToken = tokenGenerator.generateAccessToken(username, user.getId());
-            JwtTokenGenerator.RefreshTokenData refreshTokenData = tokenGenerator.generateRefreshToken(user.getUsername(), user.getId());
-            saveRefreshToken(refreshTokenData.jti(), refreshTokenData.expiresAt(), user);
-            return new LoginResponse(accessToken, refreshTokenData.token( ));
+            String refreshToken=refreshTokenData.token();
+
+            saveRefreshToken(refreshTokenData, user);
+
+            return new LoginResponse(accessToken, refreshToken);
         }
 
-        private void saveRefreshToken(String jti, Instant expiresAt, User user) {
+        private void saveRefreshToken(RefreshTokenData refreshTokenData, User user) {
+            String jti=refreshTokenData.jti();
+            Instant expiresAt=refreshTokenData.expiresAt();
+
             RefreshToken refreshToken = new RefreshToken(jti, expiresAt, user);
+
             refreshTokenRepository.save(refreshToken);
         }
     }

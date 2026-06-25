@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 public class RegService {
+
     private final RegValidation validation;
     private final UserRepository repository;
     private final PasswordEncoder encoder;
+
     @Autowired
     public RegService(RegValidation validation, UserRepository repository,PasswordEncoder encoder){
         this.validation=validation;

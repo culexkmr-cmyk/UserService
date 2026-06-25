@@ -2,6 +2,7 @@ package com.culex.userService.service.user.changeNickname;
 
 import com.culex.userService.DB.entities.User;
 import com.culex.userService.DB.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -9,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -37,14 +38,16 @@ public class ChangeNicknameServiceTest {
         User mockUser = mock(User.class);
         when(mockUser.getNickname()).thenReturn(oldNickname);
 
-        when(validation.allValidation(newNickname, userId)).thenReturn(mockUser);
+        when(repository.findById(userId)).thenReturn(Optional.of(mockUser));
+        doNothing().when(validation).allValidation(newNickname, mockUser);
         when(repository.save(any(User.class))).thenReturn(mockUser);
 
         User result = changeNicknameService.changeNickname(newNickname, userId);
 
         assertSame(mockUser, result);
 
-        verify(validation).allValidation(newNickname, userId);
+        verify(repository).findById(userId);
+        verify(validation).allValidation(newNickname, mockUser);
         verify(mockUser).setNickname(newNickname);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -55,34 +58,55 @@ public class ChangeNicknameServiceTest {
     }
 
     @Test
+    @DisplayName("changeNickname: should throw EntityNotFoundException if user not found")
+    void changeNickname_UserNotFound_ShouldThrow() {
+        String newNickname = "NewNickname";
+        Long userId = 999L;
+
+        when(repository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> changeNicknameService.changeNickname(newNickname, userId));
+
+        verify(repository).findById(userId);
+        verify(validation, never()).allValidation(anyString(), any());
+        verify(repository, never()).save(any(User.class));
+    }
+
+    @Test
     @DisplayName("changeNickname: should throw exception and NOT save user if validation fails")
     void changeNickname_InvalidData_ShouldThrowAndNotSave() {
         String newNickname = null;
         Long userId = 1L;
 
+        User mockUser = mock(User.class);
+        when(repository.findById(userId)).thenReturn(Optional.of(mockUser));
+
         doThrow(new IllegalArgumentException("Nickname must be less than 26 character"))
-                .when(validation).allValidation(newNickname, userId);
+                .when(validation).allValidation(newNickname, mockUser);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            changeNicknameService.changeNickname(newNickname, userId);
-        });
+        assertThrows(IllegalArgumentException.class, () -> changeNicknameService.changeNickname(newNickname, userId));
 
+        verify(repository).findById(userId);
+        verify(validation).allValidation(newNickname, mockUser);
         verify(repository, never()).save(any(User.class));
     }
 
     @Test
-    @DisplayName("changeNickname: should throw exception if user is deleted")
+    @DisplayName("changeNickname: should throw exception if user is deleted (validation throws)")
     void changeNickname_DeletedUser_ShouldThrowAndNotSave() {
         String newNickname = "NewNickname";
         Long userId = 1L;
 
-        when(validation.allValidation(newNickname, userId))
-                .thenThrow(new IllegalStateException("User is deleted"));
+        User mockUser = mock(User.class);
+        when(repository.findById(userId)).thenReturn(Optional.of(mockUser));
 
-        assertThrows(IllegalStateException.class, () -> {
-            changeNicknameService.changeNickname(newNickname, userId);
-        });
+        doThrow(new IllegalStateException("User is deleted"))
+                .when(validation).allValidation(newNickname, mockUser);
 
+        assertThrows(IllegalStateException.class, () -> changeNicknameService.changeNickname(newNickname, userId));
+
+        verify(repository).findById(userId);
+        verify(validation).allValidation(newNickname, mockUser);
         verify(repository, never()).save(any(User.class));
     }
 }

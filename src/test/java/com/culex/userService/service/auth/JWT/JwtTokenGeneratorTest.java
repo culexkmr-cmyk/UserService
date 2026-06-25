@@ -1,7 +1,5 @@
 package com.culex.userService.service.auth.JWT;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.TestPropertySource;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -82,7 +79,7 @@ public class JwtTokenGeneratorTest {
         long userId = 456L;
         Instant beforeGeneration = Instant.now();
 
-        JwtTokenGenerator.RefreshTokenData result = jwtTokenGenerator.generateRefreshToken(username, userId);
+        RefreshTokenData result = jwtTokenGenerator.generateRefreshToken(username, userId);
 
         assertNotNull(result);
         assertNotNull(result.token());
@@ -122,8 +119,8 @@ public class JwtTokenGeneratorTest {
         String username = "testUser";
         long userId = 999L;
 
-        JwtTokenGenerator.RefreshTokenData result1 = jwtTokenGenerator.generateRefreshToken(username, userId);
-        JwtTokenGenerator.RefreshTokenData result2 = jwtTokenGenerator.generateRefreshToken(username, userId);
+        RefreshTokenData result1 = jwtTokenGenerator.generateRefreshToken(username, userId);
+        RefreshTokenData result2 = jwtTokenGenerator.generateRefreshToken(username, userId);
 
         assertNotEquals(result1.jti(), result2.jti(), "Каждый refresh token должен иметь уникальный jti");
         assertNotEquals(result1.token(), result2.token(), "Токены должны быть разными");

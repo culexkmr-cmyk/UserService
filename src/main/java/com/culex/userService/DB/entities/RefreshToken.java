@@ -14,12 +14,11 @@ import java.time.Instant;
 @NoArgsConstructor
 public class RefreshToken {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Id
+    @Column(name = "jti", updatable = false, nullable = false, length = 36)
     private String jti;
+
 
     @Column(nullable = false)
     private Instant expiresAt;

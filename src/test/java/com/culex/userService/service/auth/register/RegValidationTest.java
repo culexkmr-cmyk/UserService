@@ -4,7 +4,6 @@ import com.culex.userService.DB.entities.User;
 import com.culex.userService.DB.repositories.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -20,209 +19,183 @@ import static org.mockito.Mockito.*;
         "app.auth.register.username.length.max=20",
         "app.auth.register.username.length.min=4",
         "app.auth.register.nickname.length.max=25"
-        })
+})
 @DisplayName("RegValidation Unit Tests")
 class RegValidationTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
     @Autowired
     private RegValidation regValidation;
 
-    // Test configuration values
     private final int minUsernameLength = 4;
     private final int maxUsernameLength = 20;
     private final int minPasswordLength = 6;
     private final int maxPasswordLength = 30;
     private final int maxNicknameLength = 25;
 
+    private final String validUsername = "validUser";
+    private final String validEmail = "valid@example.com";
+    private final String validPassword = "ValidPass123";
+    private final String validNickname = "ValidNick";
+
     @Test
-    @DisplayName("usernameValidation: should pass for valid username")
-    void usernameValidation_ValidUsername_ShouldPass() {
-        String validUsername = "validUser123";
+    @DisplayName("allValidation should pass when all fields are valid")
+    void allValidation_AllValid_ShouldPass() {
         when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> regValidation.usernameValidation(validUsername));
+        assertDoesNotThrow(() -> regValidation.allValidation(validNickname, validPassword, validUsername, validEmail));
     }
 
     @Test
-    @DisplayName("usernameValidation: should throw exception for null username")
-    void usernameValidation_NullUsername_ShouldThrow() {
+    @DisplayName("allValidation should throw for null username")
+    void allValidation_NullUsername_ShouldThrow() {
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
+
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> regValidation.usernameValidation(null));
+                () -> regValidation.allValidation(validNickname, validPassword, null, validEmail));
         assertTrue(exception.getMessage().contains("Username must be longer than"));
     }
 
     @Test
-    @DisplayName("usernameValidation: should throw exception if username is too short")
-    void usernameValidation_TooShort_ShouldThrow() {
+    @DisplayName("allValidation should throw for too short username")
+    void allValidation_UsernameTooShort_ShouldThrow() {
         String shortUsername = "a".repeat(minUsernameLength - 1);
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> regValidation.usernameValidation(shortUsername));
+                () -> regValidation.allValidation(validNickname, validPassword, shortUsername, validEmail));
         assertTrue(exception.getMessage().contains("Username must be longer than"));
     }
 
     @Test
-    @DisplayName("usernameValidation: should throw exception if username is too long")
-    void usernameValidation_TooLong_ShouldThrow() {
+    @DisplayName("allValidation should throw for too long username")
+    void allValidation_UsernameTooLong_ShouldThrow() {
         String longUsername = "a".repeat(maxUsernameLength + 1);
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
+
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> regValidation.usernameValidation(longUsername));
+                () -> regValidation.allValidation(validNickname, validPassword, longUsername, validEmail));
         assertTrue(exception.getMessage().contains("less than"));
     }
 
     @Test
-    @DisplayName("usernameValidation: should throw exception if username already exists")
-    void usernameValidation_AlreadyExists_ShouldThrow() {
-        String existingUsername = "existingUser";
-
-        when(userRepository.findByUsername(existingUsername)).thenReturn(Optional.of(mock(User.class)));
+    @DisplayName("allValidation should throw if username already exists")
+    void allValidation_UsernameAlreadyExists_ShouldThrow() {
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.of(mock(User.class)));
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> regValidation.usernameValidation(existingUsername));
+                () -> regValidation.allValidation(validNickname, validPassword, validUsername, validEmail));
         assertEquals("User with this username already exists", exception.getMessage());
     }
 
     @Test
-    @DisplayName("usernameValidation: should throw exception if username starts with 'deleted_'")
-    void usernameValidation_StartsWithDeleted_ShouldThrow() {
+    @DisplayName("allValidation should throw if username starts with 'deleted_'")
+    void allValidation_UsernameStartsWithDeleted_ShouldThrow() {
         String deletedUsername = "deleted_user123";
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> regValidation.usernameValidation(deletedUsername));
+                () -> regValidation.allValidation(validNickname, validPassword, deletedUsername, validEmail));
         assertEquals("Username cannot start with 'deleted_'", exception.getMessage());
     }
 
-
     @Test
-    @DisplayName("passwordValidation: should pass for valid password")
-    void passwordValidation_ValidPassword_ShouldPass() {
-        String validPassword = "SecurePass123!";
-        assertDoesNotThrow(() -> regValidation.passwordValidation(validPassword));
-    }
-
-    @Test
-    @DisplayName("passwordValidation: should throw exception for null password")
-    void passwordValidation_NullPassword_ShouldThrow() {
-        assertThrows(IllegalArgumentException.class,
-                () -> regValidation.passwordValidation(null));
-    }
-
-
-    @Test
-    @DisplayName("passwordValidation: should throw exception if password is too short")
-    void passwordValidation_TooShort_ShouldThrow() {
-        String shortPassword = "a".repeat(minPasswordLength - 1);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> regValidation.passwordValidation(shortPassword));
-    }
-
-    @Test
-    @DisplayName("passwordValidation: should throw exception if password is too long")
-    void passwordValidation_TooLong_ShouldThrow() {
-        String longPassword = "a".repeat(maxPasswordLength + 1);
-        assertThrows(IllegalArgumentException.class,
-                () -> regValidation.passwordValidation(longPassword));
-    }
-
-
-    @Test
-    @DisplayName("nicknameValidation: should pass for valid nickname")
-    void nicknameValidation_ValidNickname_ShouldPass() {
-        String validNickname = "CoolNickname";
-        assertDoesNotThrow(() -> regValidation.nicknameValidation(validNickname));
-    }
-
-    @Test
-    @DisplayName("nicknameValidation: should throw exception for null nickname")
-    void nicknameValidation_NullNickname_ShouldThrow() {
-        assertThrows(IllegalArgumentException.class,
-                () -> regValidation.nicknameValidation(null));
-    }
-
-    @Test
-    @DisplayName("nicknameValidation: should throw exception if nickname is too long")
-    void nicknameValidation_TooLong_ShouldThrow() {
-        String longNickname = "a".repeat(maxNicknameLength + 1);
-        assertThrows(IllegalArgumentException.class,
-                () -> regValidation.nicknameValidation(longNickname));
-    }
-
-
-    @Test
-    @DisplayName("emailValidation: should pass for valid email")
-    void emailValidation_ValidEmail_ShouldPass() {
-        String validEmail = "user@example.com";
+    @DisplayName("allValidation should throw for null password")
+    void allValidation_NullPassword_ShouldThrow() {
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> regValidation.emailValidation(validEmail));
-    }
-
-    @Test
-    @DisplayName("emailValidation: should throw exception for null email")
-    void emailValidation_NullEmail_ShouldThrow() {
         assertThrows(IllegalArgumentException.class,
-                () -> regValidation.emailValidation(null));
+                () -> regValidation.allValidation(validNickname, null, validUsername, validEmail));
     }
 
     @Test
-    @DisplayName("emailValidation: should throw exception for invalid email format")
-    void emailValidation_InvalidFormat_ShouldThrow() {
-        String invalidEmail = "invalid-email-format";
+    @DisplayName("allValidation should throw for too short password")
+    void allValidation_PasswordTooShort_ShouldThrow() {
+        String shortPassword = "a".repeat(minPasswordLength - 1);
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> regValidation.allValidation(validNickname, shortPassword, validUsername, validEmail));
+    }
+
+    @Test
+    @DisplayName("allValidation should throw for too long password")
+    void allValidation_PasswordTooLong_ShouldThrow() {
+        String longPassword = "a".repeat(maxPasswordLength + 1);
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> regValidation.allValidation(validNickname, longPassword, validUsername, validEmail));
+    }
+
+    @Test
+    @DisplayName("allValidation should throw for null nickname")
+    void allValidation_NullNickname_ShouldThrow() {
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> regValidation.allValidation(null, validPassword, validUsername, validEmail));
+    }
+
+    @Test
+    @DisplayName("allValidation should throw for too long nickname")
+    void allValidation_NicknameTooLong_ShouldThrow() {
+        String longNickname = "a".repeat(maxNicknameLength + 1);
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
+
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> regValidation.emailValidation(invalidEmail));
+                () -> regValidation.allValidation(longNickname, validPassword, validUsername, validEmail));
+        assertTrue(exception.getMessage().contains("Nickname must be less than"));
+    }
+
+    @Test
+    @DisplayName("allValidation should throw for null email")
+    void allValidation_NullEmail_ShouldThrow() {
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> regValidation.allValidation(validNickname, validPassword, validUsername, null));
+    }
+
+    @Test
+    @DisplayName("allValidation should throw for invalid email format")
+    void allValidation_InvalidEmailFormat_ShouldThrow() {
+        String invalidEmail = "invalid-email-format";
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> regValidation.allValidation(validNickname, validPassword, validUsername, invalidEmail));
         assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
-    @DisplayName("emailValidation: should throw exception if email starts with 'deleted_'")
-    void emailValidation_StartsWithDeleted_ShouldThrow() {
+    @DisplayName("allValidation should throw if email starts with 'deleted_'")
+    void allValidation_EmailStartsWithDeleted_ShouldThrow() {
         String deletedEmail = "deleted_email@example.com";
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> regValidation.emailValidation(deletedEmail));
+                () -> regValidation.allValidation(validNickname, validPassword, validUsername, deletedEmail));
         assertEquals("Email cannot start with 'deleted_'", exception.getMessage());
     }
 
     @Test
-    @DisplayName("emailValidation: should throw exception if email already exists")
-    void emailValidation_AlreadyExists_ShouldThrow() {
-        String existingEmail = "existing@example.com";
-        // Using mock(User.class) to bypass the protected constructor
-        when(userRepository.findByEmail(existingEmail)).thenReturn(Optional.of(mock(User.class)));
+    @DisplayName("allValidation should throw if email already exists")
+    void allValidation_EmailAlreadyExists_ShouldThrow() {
+        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(validEmail)).thenReturn(Optional.of(mock(User.class)));
 
         Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> regValidation.emailValidation(existingEmail));
+                () -> regValidation.allValidation(validNickname, validPassword, validUsername, validEmail));
         assertEquals("Email already exists", exception.getMessage());
-    }
-
-
-    @Test
-    @DisplayName("allValidation: should pass when all fields are valid")
-    void allValidation_AllValid_ShouldPass() {
-        String username = "validUser";
-        String email = "valid@example.com";
-        String password = "ValidPass123";
-        String nickname = "ValidNick";
-
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
-
-        assertDoesNotThrow(() -> regValidation.allValidation(nickname, password, username, email));
-    }
-
-    @Test
-    @DisplayName("allValidation: should throw exception if any single field is invalid")
-    void allValidation_OneInvalidField_ShouldThrow() {
-        String validUsername = "validUser";
-        String invalidEmail = "invalid-email";
-        String validPassword = "ValidPass123";
-        String validNickname = "ValidNick";
-
-        when(userRepository.findByUsername(validUsername)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class,
-                () -> regValidation.allValidation(validNickname, validPassword, validUsername, invalidEmail));
     }
 }

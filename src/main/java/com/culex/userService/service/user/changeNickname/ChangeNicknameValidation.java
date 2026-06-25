@@ -12,12 +12,10 @@ public class ChangeNicknameValidation {
 
     private final int maxNicknameLength;
 
-    private final UserRepository repository;
 
     @Autowired
-    public ChangeNicknameValidation(UserRepository repository,
+    public ChangeNicknameValidation(
                                     @Value("${app.auth.register.nickname.length.max:}") int maxNicknameLength){
-        this.repository=repository;
         this.maxNicknameLength=maxNicknameLength;
     }
 
@@ -26,19 +24,16 @@ public class ChangeNicknameValidation {
             throw new IllegalArgumentException("Nickname must be less than "+ (maxNicknameLength+1) +" character");
         }
     }
-    public User userIdValidation(Long userId){
-        return repository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-    }
-    public User isUserDelete(User user){
+
+    private void isUserDelete(User user){
         if (user.isDeleted()) {
             throw new IllegalStateException("User is deleted");
         }
-        return user;
     }
-    public User allValidation(String nickname, Long userid){
+
+    public void allValidation(String nickname, User user){
         nicknameValidation(nickname);
-        return isUserDelete(userIdValidation(userid));
+        isUserDelete(user);
     }
 }
 

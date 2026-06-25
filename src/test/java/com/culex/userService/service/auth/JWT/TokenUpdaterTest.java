@@ -3,12 +3,13 @@ package com.culex.userService.service.auth.JWT;
 import com.culex.userService.DB.entities.RefreshToken;
 import com.culex.userService.DB.entities.User;
 import com.culex.userService.DB.repositories.RefreshTokenRepository;
+import com.culex.userService.DB.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
@@ -27,7 +28,7 @@ public class TokenUpdaterTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @MockitoBean
-    private TokenUpdateValidation validation;
+    private UserRepository userRepository;
 
     @Autowired
     private TokenUpdater tokenUpdater;
@@ -41,23 +42,19 @@ public class TokenUpdaterTest {
 
         User mockUser = mock(User.class);
         when(mockUser.getUsername()).thenReturn(username);
+        when(mockUser.getId()).thenReturn(userId);
 
         RefreshToken oldRefreshToken = mock(RefreshToken.class);
 
-        TokenUpdateValidation.ValidationResponse mockValidationResponse = mock(TokenUpdateValidation.ValidationResponse.class);
-        when(mockValidationResponse.user()).thenReturn(mockUser);
-        when(mockValidationResponse.refreshToken()).thenReturn(oldRefreshToken);
-        when(validation.allValidation(oldJti, userId)).thenReturn(mockValidationResponse);
+        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(mockUser));
+        when(refreshTokenRepository.findById(oldJti)).thenReturn(java.util.Optional.of(oldRefreshToken));
 
         String newJti = "new-jti-456";
         Instant newExpiresAt = Instant.now().plusSeconds(86400);
         String newRefreshTokenStr = "new-refresh-token-jwt";
-        
-        JwtTokenGenerator.RefreshTokenData mockRefreshTokenData = mock(JwtTokenGenerator.RefreshTokenData.class);
-        when(mockRefreshTokenData.jti()).thenReturn(newJti);
-        when(mockRefreshTokenData.expiresAt()).thenReturn(newExpiresAt);
-        when(mockRefreshTokenData.token()).thenReturn(newRefreshTokenStr);
-        
+
+        RefreshTokenData mockRefreshTokenData = new RefreshTokenData(newRefreshTokenStr, newExpiresAt, newJti);
+
         when(jwtTokenGenerator.generateRefreshToken(username, userId)).thenReturn(mockRefreshTokenData);
 
         String newAccessToken = "new-access-token-jwt";
@@ -68,7 +65,6 @@ public class TokenUpdaterTest {
         assertEquals(newAccessToken, response.accessToken());
         assertEquals(newRefreshTokenStr, response.refreshToken());
 
-        verify(validation).allValidation(oldJti, userId);
         verify(jwtTokenGenerator).generateRefreshToken(username, userId);
         verify(jwtTokenGenerator).generateAccessToken(username, userId);
 
@@ -89,10 +85,10 @@ public class TokenUpdaterTest {
         Long userId = 1L;
         String invalidJti = "invalid-jti";
 
-        when(validation.allValidation(invalidJti, userId))
-                .thenThrow(new BadCredentialsException("Invalid refresh token"));
+        User mockUser = mock(User.class);
+        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(mockUser));
 
-        assertThrows(BadCredentialsException.class, () -> {
+        assertThrows(EntityNotFoundException.class, () -> {
             tokenUpdater.updateToken(userId, invalidJti);
         });
 

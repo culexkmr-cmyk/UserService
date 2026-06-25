@@ -52,6 +52,4 @@ public class JwtTokenGenerator {
                 .compact();
         return new RefreshTokenData(token, expiresAt, jti);
     }
-
-    public record RefreshTokenData(String token, Instant expiresAt, String jti) {}
 }

@@ -11,32 +11,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoginValidation {
     private final PasswordEncoder encoder;
-    private final UserRepository userRepository;
 
     @Autowired
-    public LoginValidation(PasswordEncoder encoder, UserRepository userRepository) {
+    private LoginValidation(PasswordEncoder encoder) {
         this.encoder = encoder;
-        this.userRepository = userRepository;
     }
-    public User usernameValidation(String username){
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-    }
-    public User passwordValidation(String password, User user) {
+    private void passwordValidation(String password, User user) {
         if (!encoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Invalid password for user: " + user.getUsername());
         }
-        return user;
     }
-    public User isUserDelete(User user){
+    private void isUserDelete(User user){
         if (user.isDeleted()) {
             throw new IllegalStateException("User is deleted");
         }
-        return user;
     }
 
-    public User allValidation(String password, String username){
-        return passwordValidation(password, isUserDelete(usernameValidation(username)));
-
+    public void allValidation(String password, User user){
+        passwordValidation(password, user);
+        isUserDelete(user);
     }
 }

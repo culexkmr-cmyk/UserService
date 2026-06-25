@@ -51,6 +51,11 @@ public class User {
             fetch = FetchType.LAZY, orphanRemoval = true)
     private List<RefreshToken> refreshTokens = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<PasswordResetToken> passwordResetTokens = new ArrayList<>();
+
     public User(String password, String username, String nickname, String email) {
         this.password = password;
         this.username = username;
@@ -68,6 +73,7 @@ public class User {
         this.deleted = true;
         this.deletedAt = Instant.now();
         this.refreshTokens.clear();
+        this.passwordResetTokens.clear();
     }
 
     public boolean isActive() {
