@@ -2,9 +2,6 @@ package com.culex.userService.service.user.changePassword;
 
 import com.culex.userService.DB.entities.PasswordResetToken;
 import com.culex.userService.DB.entities.User;
-import com.culex.userService.DB.repositories.PasswordResetTokenRepository;
-import com.culex.userService.DB.repositories.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;

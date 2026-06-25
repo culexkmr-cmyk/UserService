@@ -22,14 +22,14 @@ public class PasswordResetToken {
     @Column(name = "token", updatable = false, nullable = false, length = 36)
     private String token;
 
-    private Instant expiryDate;
+    private Instant expirationDate;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public PasswordResetToken(String token, User user, Instant expiryDate){
+    public PasswordResetToken(String token, User user, Instant expirationDate){
     this.token=token;
     this.user=user;
-    this.expiryDate=expiryDate;
+    this.expirationDate=expirationDate;
     }
 }
