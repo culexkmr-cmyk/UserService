@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.culex.userService.utilities.Test.findEntity;
+import static com.culex.userService.utilities.EntityUtils.findEntity;
 
 @Transactional
 @Service

@@ -6,7 +6,6 @@ import com.culex.userService.DB.repositories.PasswordResetTokenRepository;
 import com.culex.userService.DB.repositories.UserRepository;
 import com.culex.userService.client.NotificationDispatcher;
 import com.culex.userService.client.NotificationType;
-import com.culex.userService.utilities.PasswordResetCodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +15,7 @@ import java.time.Instant;
 import java.util.Date;
 
 import static com.culex.userService.utilities.PasswordResetCodeGenerator.generateNumericCode;
-import static com.culex.userService.utilities.Test.findEntity;
+import static com.culex.userService.utilities.EntityUtils.findEntity;
 
 @Service
 public class ChangePasswordService {

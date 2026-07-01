@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-import static com.culex.userService.utilities.Test.findEntity;
+import static com.culex.userService.utilities.EntityUtils.findEntity;
 
 @Service
 public class TokenUpdater {
